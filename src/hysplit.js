@@ -4,6 +4,7 @@
 // a few functions first
 
 getColor = function(d) {
+    // called only by contourStyle right now
     return d >= -10 ? '#800000' :
 	d >= -11 ? '#ff3200' :
 	d >= -12 ? '#ffb900' :
@@ -15,6 +16,8 @@ getColor = function(d) {
 }
 
 contourStyle = function(feature) {
+    // not called by anything!
+    // (actually called by a function in main.js)
     return {
 	weight: 0,
 	opacity: 1,
@@ -25,6 +28,7 @@ contourStyle = function(feature) {
 }
 
 highlightFeature = function(e) {
+    // only called by onEachFeature
     var contour = e.target;
     var tooltip_options = {sticky: true};
     var tooltip = L.tooltip(tooltip_options);
@@ -49,13 +53,14 @@ addHeightGraph = function(e) {
         // description: "This is a simple line chart. You can remove the area portion by adding area: false to the arguments list.",
         data: data,
 	interpolate: d3.curveLinear,
-        width: 500,
+        width: 600,
         height: 200,
-	left: 90,
+	left: 60,
         right: 20,
 	area: false,
 	utc_time: true,
-        target: tooltip._content,
+        // target: tooltip._content,
+	target: document.getElementById("hysplit-trajectory-heights"),
         x_accessor: 'time',
         y_accessor: 'height',
 	x_label: 'Time (UTC)',
@@ -96,6 +101,8 @@ zoomToFeature = function(e) {
 }
 
 onEachFeature = function(feature, layer) {
+    // not called by anything?
+    // no, called by something in main
     layer.on({
 	mouseover: highlightFeature,
 	mouseout: resetHighlight,
@@ -104,6 +111,8 @@ onEachFeature = function(feature, layer) {
 }
 
 onEachTrajectory = function(feature, layer) {
+    // not called by anything?
+    // eh, definitely called by something
     layer.on({
 	mouseover: highlightTrajectory
 	// mouseout: resetHighlight,
@@ -118,6 +127,7 @@ onEachTrajectory = function(feature, layer) {
 L.TimeDimension.Layer.GeoJson2 = L.TimeDimension.Layer.GeoJson.extend({
     initialize: function(layer, options) {
 	this.fwd = !!options['fwd'];
+	this.hysplit = options['hysplit'];
         L.TimeDimension.Layer.GeoJson.prototype.initialize.call(this, layer, options);
     },
     _update: function() {
@@ -246,6 +256,18 @@ L.TimeDimension.Layer.GeoJson2 = L.TimeDimension.Layer.GeoJson.extend({
                 coordinates: new_coordinates
             }
         };
+    },
+    onAdd: function(map) {
+	L.TimeDimension.Layer.GeoJson.prototype.onAdd.call(this, map);
+	this.hysplit.updateHeightGraph(map);
+	// addHeightGraph.bind(this._baseLayer.getLayers()[0])(0);
+	// document.getElementById("hysplit-trajectory-heights").style.display = 'block';
+    },
+    onRemove: function(map) {
+	L.TimeDimension.Layer.GeoJson.prototype.onRemove.call(this, map);
+	this.hysplit.updateHeightGraph(map);
+	// addHeightGraph.bind(this._baseLayer.getLayers()[0])(0);
+	// document.getElementById("hysplit-trajectory-heights").style.display = 'none';
     }
 });
 
@@ -314,6 +336,31 @@ L.LayerArray.Contours = L.LayerArray.extend({
 L.layerArray.contours = function(options) {
     return new L.LayerArray.Contours(options);
 };
+
+
+// a control div containing a trajectory height graph
+L.Control.Trajectories = L.Control.extend({
+    onAdd: function(map) {
+	// create the div to hold the graph
+        var div = L.DomUtil.create('div', 'info');
+
+        div.id = 'hysplit-trajectory-heights';
+
+	// add listeners to react when the trajectories change?
+
+        return div;
+    },
+
+    onRemove: function(map) {
+        // Nothing to do here
+    }
+});
+
+L.control.trajectories = function(opts) {
+    return new L.Control.Trajectories(opts);
+}
+
+// L.control.trajectories({ position: 'bottomright' }).addTo(map);
 
 
 // A layer containing the contours and trajectories for HYSPLIT and
@@ -465,6 +512,82 @@ L.LayerGroup.Hysplit = L.LayerGroup.extend({
 	    this.height_slider.addTo(map);   
 	}
     },
+    addHeightGraph: function(map) {
+	// add the leaflet control with the trajectory height graph
+	L.control.trajectories({ position: 'bottomright' }).addTo(map);
+    },
+    updateHeightGraph: function(map) {
+	// storing the trajectories in here
+	var data = [];
+	// get the ensemble trajectories
+	if (map.hasLayer(this.ens_trajectory_layer)) {
+	    console.log(this.ens_trajectory_layer.getLayers()[0]._baseLayer.getLayers());
+	    var ens_trajectories = this.ens_trajectory_layer.getLayers()[0]._baseLayer.getLayers();
+	    for (var i = 0; i < ens_trajectories.length; i++) {
+	    	var trajectory = ens_trajectories[i];
+		// console.log(trajectory);
+	    	var times = trajectory.feature.properties.times;
+	    	var heights = trajectory.feature.properties.heights;
+	    	var data_i = [];
+	    	for (var j=0; j<times.length; j++) {
+	    	    data_i.push({'time': new Date(times[j]), 'height': heights[j]});
+	    	}
+	    	data.push(data_i);
+	    }
+	}
+	// get the primary trajectory
+	if (map.hasLayer(this.single_trajectory_layer)) {
+	    // this is ridiculous, really need to rearrange it
+	    var trajectory = this.single_trajectory_layer.getLayers()[0]._baseLayer.getLayers()[0];
+	    var times = trajectory.feature.properties.times;
+	    var heights = trajectory.feature.properties.heights;
+	    var data_i = [];
+	    for (var i=0; i<times.length; i++) {
+		data_i.push({'time': new Date(times[i]), 'height': heights[i]});
+	    }
+	    data.push(data_i);
+	}
+
+	if (data.length > 0) {
+	    console.log('data length:');
+	    console.log(data.length);
+	    // update the graph!
+	    MG.data_graphic({
+		title: "Trajectory Height",
+		data: data,
+		interpolate: d3.curveLinear,
+		width: 600,
+		height: 200,
+		left: 60,
+		right: 20,
+		area: false,
+		utc_time: true,
+		y_extended_ticks: true,
+		target: document.getElementById("hysplit-trajectory-heights"),
+		x_accessor: 'time',
+		y_accessor: 'height',
+		x_label: 'Time (UTC)',
+		y_label: 'Height AGL (m)',
+	    });
+
+	    // change the css to match the map
+	    for (var i=0; i<data.length; i++) {
+		var css_path = "#hysplit-trajectory-heights path.mg-line" + (i + 1);
+		console.log(css_path);
+		var x = document.querySelectorAll(css_path)[0];
+		// x.style.color = 'blue';
+		// x.style.dashArray = '5';
+		// x.setAttribute("stroke", "red")
+		x.setAttribute("class", x.getAttribute('class') + " mgline");
+	    }
+	    // ...
+	    document.getElementById("hysplit-trajectory-heights").style.display = 'block';
+
+	} else {
+	    // disappear the div
+	    document.getElementById("hysplit-trajectory-heights").style.display = 'none';
+	}
+    },
     addContour: function() {
 	this.displayData(this.time, this.height);
     },
@@ -481,6 +604,7 @@ L.LayerGroup.Hysplit = L.LayerGroup.extend({
     },
     onAdd: function(map) {
 	this.setup_sliders(map);
+	this.addHeightGraph(map);
 	this.contour_layer.addLayer(this.contours);
 	this.ens_trajectory_layer.addLayer(this.trajectories);
 	this.single_trajectory_layer.addLayer(this.trajectory);
