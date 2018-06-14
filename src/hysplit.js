@@ -3,26 +3,26 @@
 
 // a few functions first
 
-getColor = function(d) {
-    return d >= -10 ? '#800000' :
-	d >= -11 ? '#ff3200' :
-	d >= -12 ? '#ffb900' :
-	d >= -13 ? '#b6ff41' :
-	d >= -14 ? '#41ffb6' :
-	d >= -15 ? '#00a4ff' :
-	d >= -16 ? '#0012ff' :
-	'#000080';
-}
+// getColor = function(d) {
+//     return d >= -10 ? '#800000' :
+// 	d >= -11 ? '#ff3200' :
+// 	d >= -12 ? '#ffb900' :
+// 	d >= -13 ? '#b6ff41' :
+// 	d >= -14 ? '#41ffb6' :
+// 	d >= -15 ? '#00a4ff' :
+// 	d >= -16 ? '#0012ff' :
+// 	'#000080';
+// }
 
-contourStyle = function(feature) {
-    return {
-	weight: 0,
-	opacity: 1,
-	color: 'white',
-	fillOpacity: 0.5,
-	fillColor: getColor(feature.properties.level)
-    };
-}
+// contourStyle = function(feature) {
+//     return {
+// 	weight: 0,
+// 	opacity: 1,
+// 	color: 'white',
+// 	fillOpacity: 0.5,
+// 	fillColor: getColor(feature.properties.level)
+//     };
+// }
 
 highlightFeature = function(e) {
     var contour = e.target;
@@ -355,11 +355,30 @@ L.LayerGroup.Hysplit = L.LayerGroup.extend({
 	// single trajectory
 	this.trajectory;
 	// this.getColor = this._hysplit.getColor;
-	this.getColor = this.options.getColor;
+	// this.getColor = this.options.getColor;
 	this.time_slider;
 	this.height_slider;
 	this.timedim = this.options.timedim;
 	this.td_layer;
+    },
+    getColor: function(d) {
+	return d >= -10 ? '#800000' :
+	    d >= -11 ? '#ff3200' :
+	    d >= -12 ? '#ffb900' :
+	    d >= -13 ? '#b6ff41' :
+	    d >= -14 ? '#41ffb6' :
+	    d >= -15 ? '#00a4ff' :
+	    d >= -16 ? '#0012ff' :
+	    '#000080';
+    },
+    contourStyle: function(feature) {
+	return {
+	    weight: 0,
+	    opacity: 1,
+	    color: 'white',
+	    fillOpacity: 0.5,
+	    fillColor: this.getColor(feature.properties.level)
+	};
     },
     highlightFeature: function(e) {
 	var contour = e.target;
@@ -514,7 +533,7 @@ L.LayerArray.Simulations = L.LayerArray.extend({
 	this.contour_layer = this.options.contour_layer;
 	this.ens_trajectory_layer = this.options.ens_trajectory_layer;
 	this.single_trajectory_layer = this.options.single_trajectory_layer;
-	this.getColor = this.options.getColor;
+	// this.getColor = this.options.getColor;
 
 	// useful for organizing the controls
 	// this.time_slider;
