@@ -1,40 +1,4 @@
-// functions and classes for HYSPLIT interactive viewer app
-
-
-// a few functions first
-
-// getColor = function(d) {
-//     return d >= -10 ? '#800000' :
-// 	d >= -11 ? '#ff3200' :
-// 	d >= -12 ? '#ffb900' :
-// 	d >= -13 ? '#b6ff41' :
-// 	d >= -14 ? '#41ffb6' :
-// 	d >= -15 ? '#00a4ff' :
-// 	d >= -16 ? '#0012ff' :
-// 	'#000080';
-// }
-
-// contourStyle = function(feature) {
-//     return {
-// 	weight: 0,
-// 	opacity: 1,
-// 	color: 'white',
-// 	fillOpacity: 0.5,
-// 	fillColor: getColor(feature.properties.level)
-//     };
-// }
-
-// highlightFeature = function(e) {
-//     var contour = e.target;
-//     var tooltip_options = {sticky: true};
-//     var tooltip = L.tooltip(tooltip_options);
-//     var text = '</sup> m<sup>-3</sup>';
-//     text = '10<sup>' + contour.feature.properties.level + text;
-//     contour.bindTooltip(tooltip).openTooltip();
-//     contour.setTooltipContent(text);
-// }
-
-// helpful classes
+// classes for HYSPLIT interactive viewer app
 
 // extending the geojson time dimension layer to allow backward
 // trajectories
