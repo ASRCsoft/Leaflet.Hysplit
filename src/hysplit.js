@@ -24,15 +24,15 @@
 //     };
 // }
 
-highlightFeature = function(e) {
-    var contour = e.target;
-    var tooltip_options = {sticky: true};
-    var tooltip = L.tooltip(tooltip_options);
-    var text = '</sup> m<sup>-3</sup>';
-    text = '10<sup>' + contour.feature.properties.level + text;
-    contour.bindTooltip(tooltip).openTooltip();
-    contour.setTooltipContent(text);
-}
+// highlightFeature = function(e) {
+//     var contour = e.target;
+//     var tooltip_options = {sticky: true};
+//     var tooltip = L.tooltip(tooltip_options);
+//     var text = '</sup> m<sup>-3</sup>';
+//     text = '10<sup>' + contour.feature.properties.level + text;
+//     contour.bindTooltip(tooltip).openTooltip();
+//     contour.setTooltipContent(text);
+// }
 
 addHeightGraph = function(e) {
     var times = this.feature.properties.times;
@@ -95,13 +95,13 @@ zoomToFeature = function(e) {
     map.fitBounds(e.target.getBounds());
 }
 
-onEachFeature = function(feature, layer) {
-    layer.on({
-	mouseover: highlightFeature,
-	mouseout: resetHighlight,
-	click: zoomToFeature
-    });
-}
+// onEachFeature = function(feature, layer) {
+//     layer.on({
+// 	mouseover: highlightFeature,
+// 	mouseout: resetHighlight,
+// 	click: zoomToFeature
+//     });
+// }
 
 onEachTrajectory = function(feature, layer) {
     layer.on({
