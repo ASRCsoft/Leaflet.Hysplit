@@ -1,0 +1,46 @@
+/* a few changes to jquery-ui slider pips to look better with leaflet
+*/
+
+/* common settings */
+.ui-slider-pips {
+    margin: 10px;
+}
+.slider-axis .ui-slider-pips .ui-slider-label,
+.slider-axis .ui-slider-pips .ui-slider-label {
+    color: black;
+}
+.ui-widget.ui-widget-content {
+    border: 1px solid #666;
+}
+.ui-state-default, .ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default, .ui-button,
+html .ui-button.ui-state-disabled:hover,
+html .ui-button.ui-state-disabled:active {
+    border: 1px solid #666;
+}
+.ui-state-active, .ui-widget-content .ui-state-active {
+    /* get rid of the garish blue jquery ui default color when active */
+    background: #e5e5e5;
+}
+
+/* vertical sliders */
+.ui-slider-vertical.ui-slider-pips .ui-slider-label {
+    width: max-content;
+    margin-left: -5px;
+}
+.ui-slider-vertical {
+    height: 35px;
+}
+.slider-axis.info {
+    background: none;
+    box-shadow: none;
+}
+.info.slider-axis h4 {
+    color: #111;
+    margin-bottom: 15px;
+}
+.ui-slider-vertical.ui-slider-pips .ui-slider-line {
+    width: 6px;
+    left: -8px;
+    background: #666;
+}
